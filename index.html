@@ -19,64 +19,27 @@
         left: 0;
         background: #000;
         -webkit-user-select: none;
+        z-index: 1;
       }
-      #ball {
-          width: 20px;
-          height: 20px;
-          border-radius: 10px;
-          -webkit-radius: 10px;
-          background-color: red;
-          position:absolute;
-          top: 0px;
-          left: 0px;
+      #debug {
+        width: 200px;
+        height: 22px;
+        border-radius: 10px;
+        -webkit-radius: 10px;
+        background-color: red;
+        position:absolute;
+        top: 0px;
+        left: 0px;
+        z-index: 2;
+        text-align: center;
+        display: none;
       }
     </style>
   </head>
   <body>
-    <div id="ball"></div> 
-
+    <div id="debug">This is a test</div>
     <canvas id="canvas"></canvas>
     <script type="text/javascript">
-      if (window.DeviceMotionEvent==undefined) {
-        document.getElementById("ball").style.display="none";
-      } else {
-        // Position Variables
-        var x = 0;
-        var y = 0;
-
-        // Speed - Velocity
-        var vx = 0;
-        var vy = 0;
-
-        // Acceleration
-        var ax = 0;
-        var ay = 0;
-
-        var delay = 10;
-        var vMultiplier = 0.01;
-`
-        window.ondevicemotion = function(event) {
-          ax = event.accelerationIncludingGravity.x;
-          ay = event.accelerationIncludingGravity.y;
-          az = event.accelerationIncludingGravity.z;
-          setInterval(function() {
-              vy = vy + -(ay);
-              vx = vx + ax;
-
-              var ball = document.getElementById("ball");
-              y = parseInt(y + vy * vMultiplier);
-              x = parseInt(x + vx * vMultiplier);
-
-              if (x<0) { x = 0; vx = 0; }
-              if (y<0) { y = 0; vy = 0; }
-              if (x>document.documentElement.clientWidth-20) { x = document.documentElement.clientWidth-20; vx = 0; }
-              if (y>document.documentElement.clientHeight-20) { y = document.documentElement.clientHeight-20; vy = 0; }
-
-              ball.style.top = y + "px";
-              ball.style.left = x + "px";
-          }, delay);
-      }
-
       var canvas = document.getElementById("canvas");
       canvas.width = document.body.offsetWidth;
       canvas.height = document.body.offsetHeight;
@@ -85,7 +48,7 @@
       var prevPoints = {};
 
       function perp(c, method, a, b, dist) {
-        var dy = a[3] - b[1];
+        var dy = a[1] - b[1];
         if(dy == 0) {
           method.call(c, b[0], dist + b[1]);
         }
@@ -159,6 +122,28 @@
         }
         return false;
       };
+
+      // shake the phone upside down to 'clear'.
+      var debug = document.getElementById("debug");
+      if (window.DeviceMotionEvent==undefined) {
+        debug.textContent = "DeviceMotionEvent is not supported :-(";
+      } else {
+        window.ondevicemotion = function(e) {
+          ax = e.accelerationIncludingGravity.x;
+          ay = e.accelerationIncludingGravity.y;
+          az = e.accelerationIncludingGravity.z;
+          
+          debug.textContent =
+            "x: " + ax.toFixed(2) + " " +
+            "y: " + ay.toFixed(2) + " " +
+            "z: " + az.toFixed(2);
+
+          if (az > 12) {
+            c.fillStyle = "rgba(0,0,0,0.2)";
+            c.fillRect(0, 0, canvas.width, canvas.height);
+          }
+        };
+      }
     </script>
   </body>
 </html>
